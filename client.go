@@ -20,17 +20,19 @@ type Client struct {
 	url       string
 	appKey    string
 	appSecret string
+	userTax   string
 
 	tc          TokenController
 	restyClient *resty.Client
 	rand        *rand.Rand
 }
 
-func New(url, appKey, appSecret string, tc TokenController) *Client {
+func New(url, appKey, appSecret, userTax string, tc TokenController) *Client {
 	return &Client{
 		url:         url,
 		appKey:      appKey,
 		appSecret:   appSecret,
+		userTax:     userTax,
 		tc:          tc,
 		restyClient: resty.New().SetTimeout(5 * time.Second),
 		rand:        rand.New(rand.NewSource(time.Now().UnixNano())), // nolint: gosec
@@ -145,7 +147,7 @@ type (
 		IsOfferInvoiceDetail string   `json:"isOfferInvoiceDetail,omitempty"`
 	}
 
-	QueryInvoiceResponse struct {
+	InvoiceResultItem struct {
 		SerialNo                  string `json:"serialNo"`
 		OrderNo                   string `json:"orderNo"`
 		Status                    string `json:"status"`
@@ -181,7 +183,7 @@ type (
 		SalerTaxNum               string `json:"salerTaxNum"`
 		SaleName                  string `json:"saleName"`
 		Remark                    string `json:"remark"`
-		ProductOilFlag            string `json:"productOilFlag"`
+		ProductOilFlag            int    `json:"productOilFlag"`
 		ImgURLs                   string `json:"imgUrls"`
 		ExtensionNumber           string `json:"extensionNumber"`
 		TerminalNumber            string `json:"terminalNumber"`
@@ -195,17 +197,17 @@ type (
 		Phone                     string `json:"phone"`
 		NotifyEmail               string `json:"notifyEmail"`
 		VehicleFlag               string `json:"vehicleFlag"`
-		CreateTime                string `json:"createTime"`
-		UpdateTime                string `json:"updateTime"`
+		CreateTime                int64  `json:"createTime"`
+		UpdateTime                int64  `json:"updateTime"`
 		ProxyInvoiceFlag          string `json:"proxyInvoiceFlag"`
-		InvoiceDate               string `json:"invoiceDate"`
+		InvoiceDate               int64  `json:"invoiceDate"`
 		InvoiceType               string `json:"invoiceType"`
 		RedReason                 string `json:"redReason"`
 		InvalidTime               string `json:"invalidTime"`
 		InvalidSource             string `json:"invalidSource"`
 		InvalidReason             string `json:"invalidReason"`
 		SpecificReason            string `json:"specificReason"`
-		SpecificFactor            string `json:"specificFactor"`
+		SpecificFactor            int    `json:"specificFactor"`
 		BuyerManagerName          string `json:"buyerManagerName"`
 		ManagerCardType           string `json:"managerCardType"`
 		ManagerCardNo             string `json:"managerCardNo"`
@@ -214,10 +216,10 @@ type (
 
 func (c *Client) QueryInvoice(
 	ctx context.Context, req *QueryInvoiceRequest,
-) (*QueryInvoiceResponse, error) {
-	resp := &QueryInvoiceResponse{}
+) ([]*InvoiceResultItem, error) {
+	resp := []*InvoiceResultItem{}
 
-	err := c.request(ctx, "nuonuo.OpeMplatform.queryInvoiceList", req, resp)
+	err := c.request(ctx, "nuonuo.OpeMplatform.queryInvoiceResult", req, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -322,11 +324,10 @@ func (c *Client) post(
 		Result   json.RawMessage `json:"result"`
 	}
 
-	resp, err := c.restyClient.R().
+	req := c.restyClient.R().
 		SetContext(ctx).
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Nuonuo-Sign", signature).
-		SetHeader("userTax", "339902999999789113").
 		SetHeader("accessToken", token).
 		SetHeader("method", method).
 		SetQueryParams(map[string]string{
@@ -337,13 +338,16 @@ func (c *Client) post(
 		}).
 		ForceContentType("application/json").
 		SetBody(body).
-		SetResult(&result).
-		Post(c.url)
+		SetResult(&result)
+
+	if c.userTax != "" {
+		req.SetHeader("userTax", c.userTax)
+	}
+
+	resp, err := req.Post(c.url)
 	if err != nil {
 		return err
 	}
-
-	// fmt.Printf("http status: %s, body: %s\n", resp.Status(), resp.Body())
 
 	if resp.IsError() {
 		return fmt.Errorf("http status: %s, body: %s", resp.Status(), resp.Body())
