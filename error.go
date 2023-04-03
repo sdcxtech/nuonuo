@@ -15,3 +15,8 @@ func (e *Error) Error() string {
 func (e *Error) IsDuplicateOrderNo() bool {
 	return e.Code == "E9106"
 }
+
+// 是否公共异常码
+func (e *Error) IsCommon(code string) bool {
+	return len(code) > 0 && code[0] == '0'
+}

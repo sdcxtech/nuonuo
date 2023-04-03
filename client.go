@@ -127,6 +127,7 @@ type (
 	}
 )
 
+// 诺税通saas请求开具发票接口
 func (c *Client) OpenInvoice(
 	ctx context.Context, req *OpenInvoiceRequest,
 ) (*OpenInvoiceResponse, error) {
@@ -214,12 +215,186 @@ type (
 	}
 )
 
+// 诺税通saas发票详情查询接口。
+// 调用该接口获取发票开票结果等有关发票信息，部分字段需要配置才返回。
 func (c *Client) QueryInvoice(
 	ctx context.Context, req *QueryInvoiceRequest,
 ) ([]*InvoiceResultItem, error) {
 	resp := []*InvoiceResultItem{}
 
 	err := c.request(ctx, "nuonuo.OpeMplatform.queryInvoiceResult", req, &resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+type (
+	FastInvoiceRedRequest struct {
+		OrderNo         string `json:"orderNo,omitempty"`         // 订单号,每个企业唯一
+		ExtensionNumber string `json:"extensionNumber,omitempty"` // 分机号（只能为空或者数字；不传默认取蓝票的分机，传了则以传入的为准）
+		ClerkID         string `json:"clerkId,omitempty"`         // 开票员id（诺诺系统中的id）
+		DeptID          string `json:"deptId,omitempty"`          // 部门门店id（诺诺系统中的id）
+		OrderTime       string `json:"orderTime,omitempty"`       // 单据时间
+		TaxNum          string `json:"taxNum,omitempty"`          // 销方企业税号（需要校验与开放平台头部报文中的税号一致）
+		InvoiceCode     string `json:"invoiceCode,omitempty"`     // 对应蓝票发票代码
+		InvoiceNumber   string `json:"invoiceNumber,omitempty"`   // 对应蓝票发票号码
+		InvoiceID       string `json:"invoiceId,omitempty"`       // 对应蓝票发票流水号
+		BillNo          string `json:"billNo,omitempty"`          // 红字确认单编号,全电红票必传
+		BillUUID        string `json:"billUuid,omitempty"`        // 红字确认单uuid
+		InvoiceLine     string `json:"invoiceLine,omitempty"`     // 全电发票票种
+		CallBackURL     string `json:"callBackUrl,omitempty"`     // 回调地址
+	}
+
+	FastInvoiceRedResponse struct {
+		Code     string `json:"code"`
+		Describe string `json:"describe"`
+		Result   struct {
+			InvoiceSerialNum string `json:"invoiceSerialNum"` // 发票流水号
+		}
+	}
+)
+
+// 诺税通saas发票快捷冲红接口。用于全电发票快捷冲红。
+func (c *Client) FastInvoiceRed(
+	ctx context.Context, req *FastInvoiceRedRequest,
+) (*FastInvoiceRedResponse, error) {
+	resp := &FastInvoiceRedResponse{}
+
+	err := c.request(ctx, "nuonuo.OpeMplatform.fastInvoiceRed", req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+type (
+	SaveInvoiceRedConfirmRequest struct {
+		BillID            string `json:"billId,omitempty"`          // 红字确认单申请号，需要保持唯一，不传的话系统自动生成一个
+		BlueInvoiceLine   string `json:"blueInvoiceLine"`           // 对应蓝票发票种类
+		ApplySource       string `json:"applySource"`               // 申请方（录入方）身份： 0 销方 1 购方
+		BlueInvoiceNumber string `json:"blueInvoiceNumber"`         // 对应蓝票全电号码（全电普票、全电专票都需要）
+		BillTime          string `json:"billTime,omitempty"`        // 填开时间（时间戳格式），默认为当前时间
+		SellerTaxNo       string `json:"sellerTaxNo"`               // 销方税号
+		SellerName        string `json:"sellerName"`                // 销方名称，申请说明为销方申请时可为空
+		DepartmentID      string `json:"departmentId,omitempty"`    // 部门门店id（诺诺网系统中的id）
+		ClerkID           string `json:"clerkId,omitempty"`         // 开票员id（诺诺网系统中的id）
+		BuyerTaxNo        string `json:"buyerTaxNo,omitempty"`      // 购方税号
+		BuyerName         string `json:"buyerName"`                 // 购方名称
+		VatUsage          string `json:"vatUsage,omitempty"`        // 蓝字发票增值税用途（预留字段可为空）: 1 勾选抵扣 2 出口退税 3 代办出口退税 4 不抵扣
+		SaleTaxUsage      string `json:"saleTaxUsage,omitempty"`    // 蓝字发票消费税用途（预留字段可为空）
+		AccountStatus     string `json:"accountStatus,omitempty"`   // 发票入账状态（预留字段可为空）： 0 未入账 1 已入账
+		RedReason         string `json:"redReason"`                 // 冲红原因： 1销货退回 2开票有误 3服务中止 4销售折让
+		ExtensionNumber   string `json:"extensionNumber,omitempty"` // 分机号
+	}
+
+	SaveInvoiceRedConfirmResponse struct {
+		Code     string `json:"code"`
+		Describe string `json:"describe"`
+		Result   string `json:"result"` // 红字确认单申请号
+	}
+)
+
+// 诺税通saas红字确认单申请接口
+func (c *Client) SaveInvoiceRedConfirm(
+	ctx context.Context, req *SaveInvoiceRedConfirmRequest,
+) (*SaveInvoiceRedConfirmResponse, error) {
+	resp := &SaveInvoiceRedConfirmResponse{}
+
+	err := c.request(ctx, "nuonuo.OpeMplatform.saveInvoiceRedConfirm", req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+type (
+	QueryInvoiceRedConfirmRequest struct {
+		Identity      string `json:"identity"`                // 操作方身份：0销方 1购方
+		BillStatus    string `json:"billStatus,omitempty"`    // 红字确认单状态（不传则查全部状态）
+		BillID        string `json:"billId,omitempty"`        // 红字确认单申请号
+		BillNo        string `json:"billNo,omitempty"`        // 红字确认单编号
+		BillUUID      string `json:"billUuid,omitempty"`      // 红字确认单 uuid
+		BillTimeStart string `json:"billTimeStart,omitempty"` // 填开起始时间
+		BillTimeEnd   string `json:"billTimeEnd,omitempty"`   // 填开结束时间
+		PageSize      string `json:"pageSize,omitempty"`      // 每页数量（默认10，最大50）
+		PageNo        string `json:"pageNo,omitempty"`        // 当前页码（默认1）
+	}
+
+	QueryInvoiceRedConfirmResponse struct {
+		Code     string                   `json:"code"`
+		Describe string                   `json:"describe"`
+		Total    string                   `json:"total"`
+		Items    []*InvoiceRedConfirmItem `json:"list"`
+	}
+
+	InvoiceRedConfirmItem struct {
+		BillNo            string `json:"billNo"`            // 红字确认单编号
+		BillUUID          string `json:"billUuid"`          // 红字确认单uuid
+		BillStatus        string `json:"billStatus"`        // 红字确认单状态
+		RequestStatus     string `json:"requestStatus"`     // 操作状态
+		OpenStatus        string `json:"openStatus"`        // 已开具红字发票标记
+		ApplySource       string `json:"applySource"`       // 录入方身份
+		BlueInvoiceLine   string `json:"blueInvoiceLine"`   // 蓝字发票票种
+		BlueInvoiceNumber string `json:"blueInvoiceNumber"` // 对应蓝票号码
+		BlueInvoiceTime   string `json:"blueInvoiceTime"`   // 蓝字发票开票日期
+		BillTime          string `json:"billTime"`          // 申请日期
+		ConfirmTime       string `json:"confirmTime"`       // 确认日期
+		SellerTaxNo       string `json:"sellerTaxNo"`       // 销方税号
+		SellerName        string `json:"sellerName"`        // 销方名称
+		BuyerTaxNo        string `json:"buyerTaxNo"`        // 购方税号
+		BuyerName         string `json:"buyerName"`         // 购方名称
+		TaxExcludedAmount string `json:"taxExcludedAmount"` // 冲红合计金额(不含税)
+		TaxAmount         string `json:"taxAmount"`         // 冲红合计税额
+		RedReason         string `json:"redReason"`         // 冲红原因
+		PdfURL            string `json:"pdfUrl"`            // 申请表pdf地址
+	}
+)
+
+// 诺税通saas红字确认单查询接口
+func (c *Client) QueryInvoiceRedConfirm(
+	ctx context.Context, req *QueryInvoiceRedConfirmRequest,
+) (*QueryInvoiceRedConfirmResponse, error) {
+	resp := &QueryInvoiceRedConfirmResponse{}
+
+	err := c.request(ctx, "nuonuo.OpeMplatform.queryInvoiceRedConfirm", req, resp)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+type (
+	ConfirmRedInvoiceRequest struct {
+		ExtensionNumber  string `json:"extensionNumber,omitempty"` // 分机号
+		ClerkID          string `json:"clerkId,omitempty"`         // 开票员id（诺诺网系统中的id）
+		DeptID           string `json:"deptId,omitempty"`          // 部门id（诺诺网系统中的id）
+		BillUUID         string `json:"billUuid,omitempty"`        // 红字确认单uuid
+		BillID           string `json:"billId,omitempty"`          // 红字确认单申请号
+		BillNo           string `json:"billNo,omitempty"`          // 红字确认单编号
+		Identity         string `json:"identity"`                  // 操作方（确认方）身份： 0：销方 1：购方
+		ConfirmAgreement string `json:"confirmAgreement"`          // 处理意见： 0：拒绝 1：同意
+		ConfirmReason    string `json:"confirmReason,omitempty"`   // 处理理由
+	}
+
+	ConfirmRedInvoiceResponse struct {
+		Code     string          `json:"code"`
+		Describe string          `json:"describe"`
+		Result   json.RawMessage `json:"result"` // 结果
+	}
+)
+
+// 诺税通saas红字确认单确认接口
+func (c *Client) ConfirmRedInvoice(
+	ctx context.Context, req *ConfirmRedInvoiceRequest,
+) (*ConfirmRedInvoiceResponse, error) {
+	resp := &ConfirmRedInvoiceResponse{}
+
+	err := c.request(ctx, "nuonuo.OpeMplatform.confirm", req, resp)
 	if err != nil {
 		return nil, err
 	}
