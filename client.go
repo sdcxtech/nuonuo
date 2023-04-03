@@ -248,11 +248,7 @@ type (
 	}
 
 	FastInvoiceRedResponse struct {
-		Code     string `json:"code"`
-		Describe string `json:"describe"`
-		Result   struct {
-			InvoiceSerialNum string `json:"invoiceSerialNum"` // 发票流水号
-		}
+		InvoiceSerialNum string `json:"invoiceSerialNum"` // 发票流水号
 	}
 )
 
@@ -291,9 +287,7 @@ type (
 	}
 
 	SaveInvoiceRedConfirmResponse struct {
-		Code     string `json:"code"`
-		Describe string `json:"describe"`
-		Result   string `json:"result"` // 红字确认单申请号
+		BillID string `json:"billId"` // 红字确认单申请号
 	}
 )
 
@@ -303,7 +297,7 @@ func (c *Client) SaveInvoiceRedConfirm(
 ) (*SaveInvoiceRedConfirmResponse, error) {
 	resp := &SaveInvoiceRedConfirmResponse{}
 
-	err := c.request(ctx, "nuonuo.OpeMplatform.saveInvoiceRedConfirm", req, resp)
+	err := c.request(ctx, "nuonuo.OpeMplatform.saveInvoiceRedConfirm", req, &resp.BillID)
 	if err != nil {
 		return nil, err
 	}
@@ -325,10 +319,8 @@ type (
 	}
 
 	QueryInvoiceRedConfirmResponse struct {
-		Code     string                   `json:"code"`
-		Describe string                   `json:"describe"`
-		Total    string                   `json:"total"`
-		Items    []*InvoiceRedConfirmItem `json:"list"`
+		Total int                      `json:"total"` // 总数
+		List  []*InvoiceRedConfirmItem `json:"list"`  // 列表
 	}
 
 	InvoiceRedConfirmItem struct {
@@ -382,9 +374,7 @@ type (
 	}
 
 	ConfirmRedInvoiceResponse struct {
-		Code     string          `json:"code"`
-		Describe string          `json:"describe"`
-		Result   json.RawMessage `json:"result"` // 结果
+		Result json.RawMessage `json:"result"` // 结果
 	}
 )
 
@@ -394,7 +384,7 @@ func (c *Client) ConfirmRedInvoice(
 ) (*ConfirmRedInvoiceResponse, error) {
 	resp := &ConfirmRedInvoiceResponse{}
 
-	err := c.request(ctx, "nuonuo.OpeMplatform.confirm", req, resp)
+	err := c.request(ctx, "nuonuo.OpeMplatform.confirm", req, &resp.Result)
 	if err != nil {
 		return nil, err
 	}
@@ -497,6 +487,7 @@ func (c *Client) post(
 		Code     string          `json:"code"`
 		Describe string          `json:"describe"`
 		Result   json.RawMessage `json:"result"`
+		List     json.RawMessage `json:"list"`
 	}
 
 	req := c.restyClient.R().
@@ -534,6 +525,7 @@ func (c *Client) post(
 
 	if resultPtr != nil {
 		err = json.Unmarshal(result.Result, resultPtr)
+
 		if err != nil {
 			return err
 		}
