@@ -14,9 +14,8 @@ func TestClient_QueryInvoiceRedConfirm(t *testing.T) {
 	resp, err := c.QueryInvoiceRedConfirm(
 		context.Background(),
 		&QueryInvoiceRedConfirmRequest{
-			Identity:      "0",
-			BillTimeStart: "2023-01-01",
-			BillTimeEnd:   "2023-01-30",
+			Identity: "0",
+			BillID:   "non-exist",
 		},
 	)
 	assert.NoError(t, err)
