@@ -1,3 +1,3 @@
 # nuonuo
 
-Go SDK for 航信诺税通sass
+Go SDK for 航信诺税通saas
