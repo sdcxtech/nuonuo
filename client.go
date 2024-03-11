@@ -232,19 +232,20 @@ func (c *Client) QueryInvoice(
 
 type (
 	FastInvoiceRedRequest struct {
-		OrderNo         string `json:"orderNo,omitempty"`         // 订单号,每个企业唯一
-		ExtensionNumber string `json:"extensionNumber,omitempty"` // 分机号（只能为空或者数字；不传默认取蓝票的分机，传了则以传入的为准）
-		ClerkID         string `json:"clerkId,omitempty"`         // 开票员id（诺诺系统中的id）
-		DeptID          string `json:"deptId,omitempty"`          // 部门门店id（诺诺系统中的id）
-		OrderTime       string `json:"orderTime,omitempty"`       // 单据时间
-		TaxNum          string `json:"taxNum,omitempty"`          // 销方企业税号（需要校验与开放平台头部报文中的税号一致）
-		InvoiceCode     string `json:"invoiceCode,omitempty"`     // 对应蓝票发票代码
-		InvoiceNumber   string `json:"invoiceNumber,omitempty"`   // 对应蓝票发票号码
-		InvoiceID       string `json:"invoiceId,omitempty"`       // 对应蓝票发票流水号
-		BillNo          string `json:"billNo,omitempty"`          // 红字确认单编号,全电红票必传
-		BillUUID        string `json:"billUuid,omitempty"`        // 红字确认单uuid
-		InvoiceLine     string `json:"invoiceLine,omitempty"`     // 全电发票票种
-		CallBackURL     string `json:"callBackUrl,omitempty"`     // 回调地址
+		OrderNo           string `json:"orderNo,omitempty"`           // 订单号,每个企业唯一
+		ExtensionNumber   string `json:"extensionNumber,omitempty"`   // 分机号（只能为空或者数字；不传默认取蓝票的分机，传了则以传入的为准）
+		ClerkID           string `json:"clerkId,omitempty"`           // 开票员id（诺诺系统中的id）
+		DeptID            string `json:"deptId,omitempty"`            // 部门门店id（诺诺系统中的id）
+		OrderTime         string `json:"orderTime,omitempty"`         // 单据时间
+		TaxNum            string `json:"taxNum,omitempty"`            // 销方企业税号（需要校验与开放平台头部报文中的税号一致）
+		InvoiceCode       string `json:"invoiceCode,omitempty"`       // 对应蓝票发票代码
+		InvoiceNumber     string `json:"invoiceNumber,omitempty"`     // 对应蓝票发票号码
+		ElecInvoiceNumber string `json:"elecInvoiceNumber,omitempty"` // 对应蓝字数电票号码,蓝票为数电票时，请传入该字段
+		InvoiceID         string `json:"invoiceId,omitempty"`         // 对应蓝票发票流水号
+		BillNo            string `json:"billNo,omitempty"`            // 红字确认单编号,全电红票必传
+		BillUUID          string `json:"billUuid,omitempty"`          // 红字确认单uuid
+		InvoiceLine       string `json:"invoiceLine,omitempty"`       // 全电发票票种
+		CallBackURL       string `json:"callBackUrl,omitempty"`       // 回调地址
 	}
 
 	FastInvoiceRedResponse struct {
@@ -268,22 +269,30 @@ func (c *Client) FastInvoiceRed(
 
 type (
 	SaveInvoiceRedConfirmRequest struct {
-		BillID            string `json:"billId,omitempty"`          // 红字确认单申请号，需要保持唯一，不传的话系统自动生成一个
-		BlueInvoiceLine   string `json:"blueInvoiceLine"`           // 对应蓝票发票种类
-		ApplySource       string `json:"applySource"`               // 申请方（录入方）身份： 0 销方 1 购方
-		BlueInvoiceNumber string `json:"blueInvoiceNumber"`         // 对应蓝票全电号码（全电普票、全电专票都需要）
-		BillTime          string `json:"billTime,omitempty"`        // 填开时间（时间戳格式），默认为当前时间
-		SellerTaxNo       string `json:"sellerTaxNo"`               // 销方税号
-		SellerName        string `json:"sellerName"`                // 销方名称，申请说明为销方申请时可为空
-		DepartmentID      string `json:"departmentId,omitempty"`    // 部门门店id（诺诺网系统中的id）
-		ClerkID           string `json:"clerkId,omitempty"`         // 开票员id（诺诺网系统中的id）
-		BuyerTaxNo        string `json:"buyerTaxNo,omitempty"`      // 购方税号
-		BuyerName         string `json:"buyerName"`                 // 购方名称
-		VatUsage          string `json:"vatUsage,omitempty"`        // 蓝字发票增值税用途（预留字段可为空）: 1 勾选抵扣 2 出口退税 3 代办出口退税 4 不抵扣
-		SaleTaxUsage      string `json:"saleTaxUsage,omitempty"`    // 蓝字发票消费税用途（预留字段可为空）
-		AccountStatus     string `json:"accountStatus,omitempty"`   // 发票入账状态（预留字段可为空）： 0 未入账 1 已入账
-		RedReason         string `json:"redReason"`                 // 冲红原因： 1销货退回 2开票有误 3服务中止 4销售折让
-		ExtensionNumber   string `json:"extensionNumber,omitempty"` // 分机号
+		BillID          string `json:"billId,omitempty"` // 红字确认单申请号，需要保持唯一，不传的话系统自动生成一个
+		BlueInvoiceLine string `json:"blueInvoiceLine"`  // 对应蓝票发票种类
+		ApplySource     string `json:"applySource"`      // 申请方（录入方）身份： 0 销方 1 购方
+
+		// 对应蓝字发票号码(蓝票是增值税发票时必传，长度为8位数字，若传20位数字则 视为是蓝字数电票号码)
+		BlueInvoiceNumber string `json:"blueInvoiceNumber,omitempty"`
+		BlueInvoiceCode   string `json:"blueInvoiceCode,omitempty"` // 对应蓝字发票代码(蓝票是增值税发票时必传)
+
+		// 对应蓝字数电票号码(数电普票、数电专票、数纸普票、数纸专票都需要传，蓝票是增值税发票时不传)
+		BlueElecInvoiceNumber string `json:"blueElecInvoiceNumber,omitempty"`
+		BillTime              string `json:"billTime,omitempty"`     // 填开时间（时间戳格式），默认为当前时间
+		SellerTaxNo           string `json:"sellerTaxNo"`            // 销方税号
+		SellerName            string `json:"sellerName"`             // 销方名称，申请说明为销方申请时可为空
+		DepartmentID          string `json:"departmentId,omitempty"` // 部门门店id（诺诺网系统中的id）
+		ClerkID               string `json:"clerkId,omitempty"`      // 开票员id（诺诺网系统中的id）
+		BuyerTaxNo            string `json:"buyerTaxNo,omitempty"`   // 购方税号
+		BuyerName             string `json:"buyerName"`              // 购方名称
+
+		// 蓝字发票增值税用途（预留字段可为空）: 1 勾选抵扣 2 出口退税 3 代办出口退税 4 不抵扣
+		VatUsage        string `json:"vatUsage,omitempty"`
+		SaleTaxUsage    string `json:"saleTaxUsage,omitempty"`    // 蓝字发票消费税用途（预留字段可为空）
+		AccountStatus   string `json:"accountStatus,omitempty"`   // 发票入账状态（预留字段可为空）： 0 未入账 1 已入账
+		RedReason       string `json:"redReason"`                 // 冲红原因： 1销货退回 2开票有误 3服务中止 4销售折让
+		ExtensionNumber string `json:"extensionNumber,omitempty"` // 分机号
 	}
 
 	SaveInvoiceRedConfirmResponse struct {
@@ -525,7 +534,6 @@ func (c *Client) post(
 
 	if resultPtr != nil {
 		err = json.Unmarshal(result.Result, resultPtr)
-
 		if err != nil {
 			return err
 		}

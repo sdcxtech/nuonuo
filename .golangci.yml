@@ -30,6 +30,7 @@ linters:
     - maligned
     # deprecated linters end
     - goimports
+    - depguard
   presets:
     - import
     - bugs
@@ -63,9 +64,9 @@ linters-settings:
     section-separators:
       - newLine
   gofumpt:
-      # Select the Go version to target. The default is `1.15`.
-      lang-version: "1.18"
-      # Choose whether or not to use the extra rules that are disabled
-      # by default
-      extra-rules: false
-      module-path: github.com/sdcxtech/nuonuo
+    # Select the Go version to target. The default is `1.15`.
+    lang-version: "1.22"
+    # Choose whether or not to use the extra rules that are disabled
+    # by default
+    extra-rules: false
+    module-path: github.com/sdcxtech/nuonuo

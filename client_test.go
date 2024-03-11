@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestClient_QueryInvoiceRedConfirm(t *testing.T) {
@@ -18,8 +19,8 @@ func TestClient_QueryInvoiceRedConfirm(t *testing.T) {
 			BillID:   "non-exist",
 		},
 	)
-	assert.NoError(t, err)
-	assert.Equal(t, resp.Total, 0)
+	require.NoError(t, err)
+	assert.Equal(t, 0, resp.Total)
 }
 
 func newClient() *Client {

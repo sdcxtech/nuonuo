@@ -1,11 +1,11 @@
 module github.com/sdcxtech/nuonuo
 
-go 1.19
+go 1.22
 
 require (
 	github.com/go-resty/resty/v2 v2.11.0
-	github.com/google/uuid v1.5.0
-	github.com/stretchr/testify v1.8.4
+	github.com/google/uuid v1.6.0
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
