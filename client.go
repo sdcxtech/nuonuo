@@ -336,6 +336,7 @@ type (
 		BillNo            string `json:"billNo"`            // 红字确认单编号
 		BillUUID          string `json:"billUuid"`          // 红字确认单uuid
 		BillStatus        string `json:"billStatus"`        // 红字确认单状态
+		BillMessage       string `json:"billMessage"`       // 描述
 		RequestStatus     string `json:"requestStatus"`     // 操作状态
 		OpenStatus        int    `json:"openStatus"`        // 已开具红字发票标记
 		ApplySource       int    `json:"applySource"`       // 录入方身份
