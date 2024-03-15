@@ -338,7 +338,7 @@ type (
 		BillStatus        string `json:"billStatus"`        // 红字确认单状态
 		RequestStatus     string `json:"requestStatus"`     // 操作状态
 		OpenStatus        int    `json:"openStatus"`        // 已开具红字发票标记
-		ApplySource       string `json:"applySource"`       // 录入方身份
+		ApplySource       int    `json:"applySource"`       // 录入方身份
 		BlueInvoiceLine   string `json:"blueInvoiceLine"`   // 蓝字发票票种
 		BlueInvoiceNumber string `json:"blueInvoiceNumber"` // 对应蓝票号码
 		BlueInvoiceTime   string `json:"blueInvoiceTime"`   // 蓝字发票开票日期
