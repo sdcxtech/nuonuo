@@ -95,7 +95,7 @@ type (
 		AdditionalElementName string               `json:"additionalElementName,omitempty"`
 		AdditionalElementList []*AdditionalElement `json:"additionalElementList,omitempty"`
 
-		InvoiceTravellerTransport []*TravellerTransportItem `json:"invoiceTravellerTransport,omitempty"`
+		InvoiceTravellerTransportInfoList []*TravellerTransportItem `json:"invoiceTravellerTransportInfoList,omitempty"`
 	}
 
 	GoodsItem struct {
