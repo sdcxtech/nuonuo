@@ -306,6 +306,8 @@ type (
 		AccountStatus   string `json:"accountStatus,omitempty"`   // 发票入账状态（预留字段可为空）： 0 未入账 1 已入账
 		RedReason       string `json:"redReason"`                 // 冲红原因： 1销货退回 2开票有误 3服务中止 4销售折让
 		ExtensionNumber string `json:"extensionNumber,omitempty"` // 分机号
+
+		OrderNo string `json:"orderNo,omitempty"` // 订单号
 	}
 
 	SaveInvoiceRedConfirmResponse struct {
