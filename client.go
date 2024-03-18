@@ -94,6 +94,8 @@ type (
 
 		AdditionalElementName string               `json:"additionalElementName,omitempty"`
 		AdditionalElementList []*AdditionalElement `json:"additionalElementList,omitempty"`
+
+		InvoiceTravellerTransport []*TravellerTransportItem `json:"invoiceTravellerTransport,omitempty"`
 	}
 
 	GoodsItem struct {
@@ -120,6 +122,17 @@ type (
 		ElementName  string `json:"elementName,omitempty"`
 		ElementType  string `json:"elementType,omitempty"`
 		ElementValue string `json:"elementValue,omitempty"`
+	}
+
+	TravellerTransportItem struct {
+		Traveller         string `json:"traveller,omitempty"`
+		TravelDate        string `json:"travelDate"`
+		TravellerCardType string `json:"travellerCardType,omitempty"`
+		TravellerCardNo   string `json:"travellerCardNo,omitempty"`
+		TravelPlace       string `json:"travelPlace"`
+		ArrivePlace       string `json:"arrivePlace"`
+		VehicleType       string `json:"vehicleType"`
+		VehicleLevel      string `json:"vehicleLevel,omitempty"`
 	}
 
 	OpenInvoiceResponse struct {
